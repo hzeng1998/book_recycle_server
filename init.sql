@@ -1,73 +1,75 @@
-create DATABASE IF NOT EXISTS book_recycle;
-USE book_recycle;
-create TABLE IF NOT EXISTS user (
-email varchar(255) not null,
-username varchar(45),
-password varchar(45) not null,
-status tinyint default 0,
-registerDate DATETIME DEFAULT CURRENT_TIMESTAMP NOT NUll,
-PRIMARY KEY (email));
+CREATE DATABASE IF NOT EXISTS `book_recycle`;
 
-create TABLE if not exists `trade` (
-  `type` TINYINT NOT NULL DEFAULT 0,
-  `owner` VARCHAR(255) NOT NULL,
-  `id` INT NOT NULL AUTO_INCREMENT,
-  `trader` VARCHAR(255) NULL,
-  `price` DOUBLE NOT NULL,
-  `title` VARCHAR(45) NOT NULL,
-  `intro` VARCHAR(255) NOT NULL,
-  `src` VARCHAR(60) NOT NULL,
-    FOREIGN KEY (`owner`) REFERENCES `user` (`email`) ON delete CASCADE ON update CASCADE,
-    FOREIGN KEY (`trader`) REFERENCES `user` (`email`) ON delete CASCADE ON update CASCADE
-    );
+USE `book_recycle`;
 
-create TABLE `book_recycle`.`trade_order` (
-  `id` INT(11) NOT NULL AUTO_INCREMENT,
-  `trade_id` INT(11) NOT NULL,
-  `price` DOUBLE NOT NULL,
-  `address` VARCHAR(255) NOT NULL,
-  `way` TINYINT NOT NULL,
-  `buyer` VARCHAR(255) NOT NULL,
-  `seller` VARCHAR(255) NOT NULL,
-  `status` TINYINT ZEROFILL NOT NULL,
+CREATE TABLE `user` (
+  `email` varchar(255) NOT NULL,
+  `username` varchar(45) DEFAULT NULL,
+  `password` varchar(60) DEFAULT NULL,
+  `status` tinyint(4) DEFAULT '0',
+  `registerDate` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `profile_photo` varchar(60) DEFAULT NULL,
+  PRIMARY KEY (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE `trade` (
+  `order_type` tinyint(4) unsigned zerofill NOT NULL,
+  `owner` varchar(255) NOT NULL,
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `trader` varchar(255) DEFAULT NULL,
+  `price` double NOT NULL,
+  `title` varchar(45) NOT NULL,
+  `intro` varchar(255) NOT NULL,
+  `src` varchar(60) NOT NULL,
+  `writer` varchar(255) NOT NULL,
+  `fineness` double NOT NULL,
+  `url` varchar(255) NOT NULL,
+  `type` tinyint(4) unsigned zerofill NOT NULL,
+  `isbn` varchar(45) NOT NULL,
   PRIMARY KEY (`id`),
-  INDEX `trader_id_idx` (`trade_id` ASC),
-  INDEX `buyer_idx` (`buyer` ASC),
-  INDEX `seller_idx` (`seller` ASC),
-  CONSTRAINT `trader_id`
-    FOREIGN KEY (`trade_id`)
-    REFERENCES `book_recycle`.`trade` (`id`)
-    ON delete CASCADE
-    ON update CASCADE,
-  CONSTRAINT `buyer`
-    FOREIGN KEY (`buyer`)
-    REFERENCES `book_recycle`.`user` (`email`)
-    ON delete CASCADE
-    ON update CASCADE,
-  CONSTRAINT `seller`
-    FOREIGN KEY (`seller`)
-    REFERENCES `book_recycle`.`user` (`email`)
-    ON delete CASCADE
-    ON update CASCADE);
+  KEY `trade_ibfk_1` (`owner`),
+  KEY `trade_ibfk_2` (`trader`),
+  CONSTRAINT `trade_ibfk_1` FOREIGN KEY (`owner`) REFERENCES `user` (`email`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `trade_ibfk_2` FOREIGN KEY (`trader`) REFERENCES `user` (`email`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=utf8;
 
-create table if not exists message_log (
-    sender varchar(255) not null,
-    receiver varchar(255) not null,
-    message varchar(255) not null,
-    sendDate DATETIME DEFAULT CURRENT_TIMESTAMP not null,
-    foreign key(sender) references user(email) ON DELETE CASCADE ON UPDATE CASCADE,
-    foreign key(receiver) references user(email) ON DELETE CASCADE ON UPDATE CASCADE
-);
-
-CREATE TABLE `book_recycle`.`info` (
-  `id` INT NOT NULL AUTO_INCREMENT,
-  `read` TINYINT ZEROFILL NOT NULL,
-  `type` TINYINT ZEROFILL NOT NULL,
-  `receiver` VARCHAR(255) NOT NULL,
+CREATE TABLE `trade_order` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `trade_id` int(11) NOT NULL,
+  `price` double NOT NULL,
+  `address` varchar(255) NOT NULL,
+  `way` tinyint(4) NOT NULL,
+  `buyer` varchar(255) NOT NULL,
+  `seller` varchar(255) NOT NULL,
+  `status` tinyint(3) unsigned zerofill NOT NULL,
   PRIMARY KEY (`id`),
-  INDEX `receiver_idx` (`receiver` ASC),
-  CONSTRAINT `receiver`
-    FOREIGN KEY (`receiver`)
-    REFERENCES `book_recycle`.`user` (`email`)
-    ON DELETE CASCADE
-    ON UPDATE CASCADE);
+  KEY `trader_id_idx` (`trade_id`),
+  KEY `buyer_idx` (`buyer`),
+  KEY `seller_idx` (`seller`),
+  CONSTRAINT `buyer` FOREIGN KEY (`buyer`) REFERENCES `user` (`email`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `seller` FOREIGN KEY (`seller`) REFERENCES `user` (`email`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `trader_id` FOREIGN KEY (`trade_id`) REFERENCES `trade` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8;
+
+CREATE TABLE `message_log` (
+  `sender` varchar(255) NOT NULL,
+  `receiver` varchar(255) NOT NULL,
+  `message` varchar(255) NOT NULL,
+  `sendDate` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  KEY `sender` (`sender`),
+  KEY `receiver` (`receiver`),
+  CONSTRAINT `message_log_ibfk_1` FOREIGN KEY (`sender`) REFERENCES `user` (`email`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `message_log_ibfk_2` FOREIGN KEY (`receiver`) REFERENCES `user` (`email`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE `info` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `read` tinyint(3) NOT NULL DEFAULT '0',
+  `type` tinyint(3) NOT NULL,
+  `receiver` varchar(255) NOT NULL,
+  `detail` varchar(255) NOT NULL,
+  `infoDate` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `receiver_idx` (`receiver`),
+  CONSTRAINT `receiver` FOREIGN KEY (`receiver`) REFERENCES `user` (`email`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8;

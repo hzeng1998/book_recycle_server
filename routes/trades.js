@@ -90,15 +90,17 @@ router.get('/confirm', jwt({secret: SECRET_KEY}), async (req, res, next) => {
     const confirmSql = `update trade_order set status=${ok} where id='${id}' and seller='${name}'`;
     const selectTradeSql = `select trade_id, buyer from trade_order where id='${id}'`;
     const updateSql = `update trade set trader=? where id=? and owner='${name}'`;
+    const updateOtherTradeSql = `update trade_order set status=2 where trade_id=?`;
     try {
       let tradeInfo = await db.query(selectTradeSql);
       await db.query(updateSql, [tradeInfo[0].buyer, tradeInfo[0].trade_id]);
+      await db.query(updateOtherTradeSql, [tradeInfo[0].trade_id]);
       await db.query(cancelSql);
       await db.query(confirmSql);
       res.json({
         status: 'success',
         data: {},
-        message: ''
+        message: 'Confirm Success'
       })
     } catch (e) {
       console.log(e);

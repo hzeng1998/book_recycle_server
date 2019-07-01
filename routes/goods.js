@@ -232,7 +232,7 @@ router.put('/', upload.single('src'), async (req, res, next) => {
       res.json({
         status: 'success',
         data: {},
-        message: 'Success'
+        message: 'Publish Success'
       });
     } catch (e) {
       console.log(e);

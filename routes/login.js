@@ -22,7 +22,15 @@ router.post('/', async (req, res, next) => {
 
   try {
     let result = await pool.query(sql, email);
-    console.log(result[0].password);
+
+    if (!result.length) {
+      res.json({
+        status: 'error',
+        data: {},
+        message: 'Invalid Email Address'
+      });
+      return;
+    }
 
     let flag = await bcrypt.compareAsync(password, result[0].password);
     flag ? res.json({
